@@ -4,6 +4,9 @@ const port = process.env.port || 3001;
 var session = require('express-session');
 var FileStore = require('session-file-store')(session);
 var app = express();
+var passport = require('passport');
+var authenticate = require('./authenticate');
+
 
 app.use(session({
   name: 'session-id',
@@ -13,16 +16,24 @@ app.use(session({
   store: new FileStore()
 }));
 
+app.use(passport.initialize());
+app.use(passport.session());
+
 function auth (req, res, next) {
-  req.session && req.session.user && 
-  req.session.user === 'authenticated' &&
-  next() ||
-  next(new Error("You are not authenticated"));
+    console.log(req.user);
+
+    if (!req.user) {
+      var err = new Error('You are not authenticated!');
+      err.status = 403;
+      next(err);
+    }
+    else {
+          next();
+    }
 }
 
 const userRouter = require("./routes/userRouter");
 app.use("/users", userRouter);
-
 app.use(auth);
 app.use("/", (req,res)=>{
   res.end("hi");

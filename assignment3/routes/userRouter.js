@@ -2,54 +2,33 @@ const express = require('express');
 const userRouter = express.Router();
 const User = require("../models/user");
 const bodyParser = require('body-parser');
+var passport = require('passport');
 
 userRouter.use(bodyParser.json());
 
 userRouter
 .post("/signup", (req, res, next) =>{
-  User.findOne({username: req.body.username})
-  .then((user)=>{
-    if(user != null){
-      next(new Error("User already exits"));
-    }else{
-      console.log(req.body);
-      return User.create({
-        username: req.body.username, password: req.body.password
-      })
+  console.log(req.blody);
+  User.register(new User({username: req.body.username}), 
+    req.body.password, (err, user) => {
+    if(err) {
+      res.statusCode = 500;
+      res.setHeader('Content-Type', 'application/json');
+      res.json({err: err});
     }
-  }).then((user)=>{
-    res.status.code = 200;  
-    res.setHeader('Content-Type', 'application/json');
-    res.json({status: 'Registration Successful!', user: user});
-  }).catch(err => next(err));
+    else {
+      passport.authenticate('local')(req, res, () => {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json({success: true, status: 'Registration Successful!'});
+      });
+    }
+  });
 })
 .post("/login", (req, res, next) => {
-  
-  if(req.session && req.session.user){
-    res.statusCode = 200;
-    res.end("You are authenticated");
-  }
-  var authHeaders = req.headers.authorization;
-  res.setHeader("WWW-Authenticate", "Basic"); 
-  res.status = 401;
-  if( !authHeaders) return next(new Error("You are not authenticate"));
-  
-    
-  var auth = new Buffer.from(authHeaders.split(' ')[1], 'base64').toString().split(':');
-  var username = auth[0];
-  var password = auth[1];
-  User.findOne({username: username}).then(user=>{
-    if(user === null) return new Error("User not found");
-    else if(user.password !== password) return new Error("Password not found");
-      
-    else if (user.username === username && user.password === password) {
-      
-      req.session.user = "authenticated";
-      res.setHeader('Content-Type', 'application/json');
-      res.statusCode = 200;
-      res.json({status: 'Registration Successful!', user: user});
-    }
-  })  
-});
+  res.statusCode = 200;
+  res.setHeader('Content-Type', 'application/json');
+  res.json({success: true, status: 'You are successfully logged in!'});
+})
 module.exports = userRouter;
 
