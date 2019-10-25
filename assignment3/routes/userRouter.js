@@ -2,13 +2,16 @@ const express = require('express');
 const userRouter = express.Router();
 const User = require("../models/user");
 const bodyParser = require('body-parser');
+const authenticate = require("../authenticate");
 var passport = require('passport');
 
 userRouter.use(bodyParser.json());
 
-userRouter
-.post("/signup", (req, res, next) =>{
-  console.log(req.blody);
+userRouter.get("/", authenticate.verifyUser, authenticate.verifyAdminUser, (req, res, next) =>{
+  User.find({}).then(users=>{res.json(users); res.end()}).catch(console.log);
+});
+
+userRouter.post("/signup", (req, res, next) =>{
   User.register(new User({username: req.body.username}), 
     req.body.password, (err, user) => {
     if(err) {
@@ -25,10 +28,13 @@ userRouter
     }
   });
 })
-.post("/login", (req, res, next) => {
+.post('/login', passport.authenticate('local'), (req, res) => {
+  console.log("login");
+  var token = authenticate.getToken({_id: req.user._id});
+  console.log("login", token);
   res.statusCode = 200;
   res.setHeader('Content-Type', 'application/json');
-  res.json({success: true, status: 'You are successfully logged in!'});
-})
+  res.json({success: true, token: token, status: 'You are successfully logged in!'});
+});
 module.exports = userRouter;
 
