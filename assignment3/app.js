@@ -7,14 +7,15 @@ var passport = require('passport');
 var authenticate = require('./authenticate');
 
 var app = express();
+
 app.use(passport.initialize());
 
 const userRouter  = require("./routes/userRouter");
-//const promoRouter = require("./routes/promoRouter");
 const dishRouter  = require("./routes/dishRouter");
+const uploadRouter = require('./routes/uploadRouter');
 
+app.use("/uploadImage", uploadRouter);
 app.use("/users",       userRouter);
-//app.use("/promotions",  promoRouter);
 app.use("/dishes",      dishRouter);;
 
 const mongoose = require("mongoose");
@@ -29,7 +30,9 @@ app.use(function(req, res, next) {
    res.end();
 });
 
+/*
 app.listen(port,()=>{
   console.log("listenign on port ",port);
 })
+*/
 module.exports = app;
