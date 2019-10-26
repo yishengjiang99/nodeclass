@@ -27,8 +27,9 @@ userRouter.post("/signup", (req, res, next) =>{
       });
     }
   });
-})
-.post('/login', passport.authenticate('local'), (req, res) => {
+});
+
+userRouter.post('/login', passport.authenticate('local'), (req, res) => {
   console.log("login");
   var token = authenticate.getToken({_id: req.user._id});
   console.log("login", token);

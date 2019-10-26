@@ -13,10 +13,12 @@ app.use(passport.initialize());
 const userRouter  = require("./routes/userRouter");
 const dishRouter  = require("./routes/dishRouter");
 const uploadRouter = require('./routes/uploadRouter');
-
+const favoriteRouter = require("./routes/favoriteRouter");
+app.use("/public",            express.static("public"));
 app.use("/uploadImage", uploadRouter);
 app.use("/users",       userRouter);
-app.use("/dishes",      dishRouter);;
+app.use("/dishes",      dishRouter);
+app.use("/favorites",   favoriteRouter);
 
 const mongoose = require("mongoose");
 mongoose.connect(url).then(() =>{
